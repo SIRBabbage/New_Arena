@@ -1,0 +1,66 @@
+<mujoco model="hammer">
+  <compiler angle="radian"/>
+
+  <asset>
+    <texture type="2d" name="Image_0" file="Image_0.png"/>
+    <material name="Hammers" texture="Image_0" specular="0.5" shininess="0.225"/>
+    <mesh file="hammer.obj" name="hammer" scale="0.7 0.7 0.7"/>
+    <mesh file="hammer_collision_0.obj" name="hammer_collision_0" scale="0.7 0.7 0.7"/>
+    <mesh file="hammer_collision_1.obj" name="hammer_collision_1" scale="0.7 0.7 0.7"/>
+    <mesh file="hammer_collision_2.obj" name="hammer_collision_2" scale="0.7 0.7 0.7"/>
+  </asset>
+
+  <worldbody>
+    <body>
+      <body name="object">
+        <!-- Inertial -->
+
+        <!-- Visual geom: group changed to 0 -->
+        <geom 
+          mesh="hammer" 
+          material="Hammers"
+          type="mesh"
+          group="1" 
+          contype="0" 
+          conaffinity="0"
+          mass="0.01" />
+
+        <!-- Collision geoms: group changed to 1 -->
+        <geom 
+          mesh="hammer_collision_0" 
+          type="mesh" 
+          group="0" 
+          solref="0.001 1" 
+          solimp="0.998 0.998 0.001"
+          rgba="0.5272990505603383 0.7421561142137685 0.9126013996703229 0"/>
+        <geom 
+          mesh="hammer_collision_1" 
+          type="mesh" 
+          group="0" 
+          solref="0.001 1" 
+          solimp="0.998 0.998 0.001"
+          rgba="0.4694908720049348 0.7359764164112605 0.9252482522804838 0"/>
+        <geom 
+          mesh="hammer_collision_2" 
+          type="mesh" 
+          group="0" 
+          solref="0.001 1" 
+          solimp="0.998 0.998 0.001"
+          rgba="0.06574018058699616 0.9696160773323821 0.8383924965892158 0"/>
+      </body>
+
+      <!-- Grasp and reference sites -->
+      <site 
+        name="grasppoint"
+        type="sphere"
+        size="0.01"
+        group="4"
+        rgba="1 0 0 1"
+        pos="0 0.2 0"/>
+
+      <site rgba="0 0 0 0" size="0.05" pos="0.0 0.0 -0.025" name="bottom_site" />
+      <site rgba="0 0 0 0" size="0.05" pos="0.0 0.0 0.025" name="top_site" />
+      <site rgba="0 0 0 0" size="0.05" pos="0.05 0.095 0" name="horizontal_radius_site" />
+    </body>
+  </worldbody>
+</mujoco>

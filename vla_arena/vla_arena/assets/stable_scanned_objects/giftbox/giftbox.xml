@@ -1,0 +1,39 @@
+<mujoco model="giftbox">
+  <compiler angle="radian"/>
+  <default>
+    <default class="visual">
+      <geom group="1" conaffinity="0" contype="0"/>
+    </default>
+    <default class="collision">
+      <geom type="box" mass="1" group="0" friction="1" solref="0.001 1"/>
+    </default>
+    <default class="keypoint">
+      <site type="sphere" size="0.01" group="3" rgba="1 0 0 1"/>
+    </default>
+    <default class="placepoint">
+      <site type="sphere" size="0.01" group="2" rgba="0 0 1 0"/>
+    </default>
+  </default>
+  <asset>
+    <texture name="box" file="./box.png" type="2d"/>
+    <material name="body" texture="box" specular="1" shininess="1"/>
+    <mesh name="body" file="./giftbox.obj" scale="0.1 0.1 0.1"/>
+  </asset>
+  <worldbody>
+  <body>
+    <body euler="1.57 0 0" pos="0 0 0.09" name="object" >
+      <geom type="mesh" mesh="body" material="body" mass="0.1" class="visual"/>
+      <!-- <geom type="mesh" mesh="body" material="body" class="collision"/> -->
+      <geom class="collision" pos="0.09 -0.02 -0.0" size="0.001 0.08 0.09"/>
+      <geom class="collision" pos="-0.09 -0.02 -0.0" size="0.001 0.08 0.09"/>
+      <geom class="collision" pos="0.0 -0.02 0.09" size="0.001 0.08 0.09" euler="0 1.57 0"/>
+      <geom class="collision" pos="0.0 -0.02 -0.09" size="0.001 0.08 0.09" euler="0 1.57 0"/>
+      <geom class="collision" pos="0.0 -0.1 0.0" size="0.001 0.09 0.09" euler="1.57 1.57 0"/>
+      </body>
+      <site class="keypoint" pos="0.09 0.06 0.09" name="top_site" />
+      <site class="keypoint" pos="-0.09 -0.1 -0.09" name="bottom_site" />
+
+      <site class="placepoint" pos="0 0.2 0" name="horizontal_radius_site"/>
+    </body>
+  </worldbody>
+</mujoco>

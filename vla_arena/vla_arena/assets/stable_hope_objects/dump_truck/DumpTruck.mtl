@@ -1,0 +1,73 @@
+# MTL written from C:\Users\Jiovanie\Desktop\TMP\DumpTruck.obj
+newmtl Axle
+Kd 0.682353 0.603922 0.568627
+Ns 256
+d 1
+illum 2
+Ka 0.135294 0.0870588 0.0752941
+Ks 0 0 0
+map_Kd M:\My Projects\My Models\Vehicles\DuckTrucks\DumpTruckDiffuseBake.png
+newmtl Default
+Kd 0.682353 0.603922 0.568627
+Ns 256
+d 1
+illum 2
+Ka 0.135294 0.0870588 0.0752941
+Ks 0 0 0
+map_Kd M:\My Projects\My Models\Vehicles\DuckTrucks\DumpTruckDiffuseBake.png
+newmtl Grille
+Kd 0.682353 0.603922 0.568627
+Ns 256
+d 1
+illum 2
+Ka 0.135294 0.0870588 0.0752941
+Ks 0 0 0
+map_Kd M:\My Projects\My Models\Vehicles\DuckTrucks\DumpTruckDiffuseBake.png
+newmtl Lug_032Nuts
+Kd 0.682353 0.603922 0.568627
+Ns 256
+d 1
+illum 2
+Ka 0.135294 0.0870588 0.0752941
+Ks 0 0 0
+map_Kd M:\My Projects\My Models\Vehicles\DuckTrucks\DumpTruckDiffuseBake.png
+newmtl Rim_032Holes
+Kd 0.682353 0.603922 0.568627
+Ns 256
+d 1
+illum 2
+Ka 0.135294 0.0870588 0.0752941
+Ks 0 0 0
+map_Kd M:\My Projects\My Models\Vehicles\DuckTrucks\DumpTruckDiffuseBake.png
+newmtl Rims
+Kd 0.682353 0.603922 0.568627
+Ns 256
+d 1
+illum 2
+Ka 0.135294 0.0870588 0.0752941
+Ks 0 0 0
+map_Kd M:\My Projects\My Models\Vehicles\DuckTrucks\DumpTruckDiffuseBake.png
+newmtl Tail_032Light
+Kd 0.682353 0.603922 0.568627
+Ns 256
+d 1
+illum 2
+Ka 0.135294 0.0870588 0.0752941
+Ks 0 0 0
+map_Kd M:\My Projects\My Models\Vehicles\DuckTrucks\DumpTruckDiffuseBake.png
+newmtl UnderBody
+Kd 0.682353 0.603922 0.568627
+Ns 256
+d 1
+illum 2
+Ka 0.135294 0.0870588 0.0752941
+Ks 0 0 0
+map_Kd M:\My Projects\My Models\Vehicles\DuckTrucks\DumpTruckDiffuseBake.png
+newmtl Windows
+Kd 0.682353 0.603922 0.568627
+Ns 256
+d 1
+illum 2
+Ka 0.135294 0.0870588 0.0752941
+Ks 0 0 0
+map_Kd M:\My Projects\My Models\Vehicles\DuckTrucks\DumpTruckDiffuseBake.png

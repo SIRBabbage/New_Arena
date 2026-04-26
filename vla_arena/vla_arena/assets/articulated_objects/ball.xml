@@ -1,0 +1,31 @@
+<mujoco>
+    <compiler angle="radian" inertiafromgeom="auto"/>
+    
+    <asset>
+        <material name="green" rgba="0 1 0 1" />
+        <texture name="grid" type="2d" builtin="checker" width="512" height="512" rgb1=".1 .2 .3" rgb2=".2 .3 .4" />
+        <material name="grid" texture="grid" texrepeat="1 1" texuniform="true" reflectance=".2" />
+    </asset>
+
+    <worldbody>
+        <!-- Light source and ground -->
+        <light diffuse="0.3 0.3 0.3" pos="1 0 3" dir="-1 0 -3" />
+        <geom type="plane" size="10 10 0.1"  material="grid" group="1"/>
+
+        <!-- robosuite requires body name="object" -->
+        <body pos="0 0 0.1">
+            <body name="object">
+            <!-- Add slide joint to allow this body to move along x-axis -->
+                <inertial pos="0 0 0" mass="0.03" diaginertia="0.01 0.01 0.01"/>
+                <geom type="sphere" size="0.01" material="green" group="1"/>
+            </body>
+            <!-- Some auxiliary sites -->
+            <site rgba="0 0 0 0" size="0.0025" pos="0 0 -0.01" name="bottom_site" /> 
+            <site rgba="0 0 0 0" size="0.0025" pos="0 0 0.01" name="top_site" />
+            <site rgba="0 0 0 0" size="0.0025" pos="0.01 0 0" name="horizontal_radius_site" />
+        </body>
+    </worldbody>
+
+    <!-- Actuator drives slide_x joint -->
+
+</mujoco>  

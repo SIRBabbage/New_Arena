@@ -38,3 +38,6 @@ print_hdf5.py
 pic.py
 TESTING_PLAN.md
 TESTING_CHECKLIST.md
+
+!vla_arena/vla_arena/assets/
+!vla_arena/vla_arena/assets/**

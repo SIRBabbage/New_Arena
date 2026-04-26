@@ -1,0 +1,32 @@
+<mujoco>
+    <compiler angle="radian" inertiafromgeom="auto"/>
+    
+    <asset>
+        <material name="green" rgba="0 1 0 1" />
+        <texture name="grid" type="2d" builtin="checker" width="512" height="512"
+                 rgb1=".1 .2 .3" rgb2=".2 .3 .4" />
+        <material name="grid" texture="grid" texrepeat="1 1" texuniform="true" reflectance=".2" />
+        <material name="water_drop" rgba="0.2 0.4 1 0.5" />
+    </asset>
+
+    <worldbody>
+        <light diffuse="0.3 0.3 0.3" pos="1 0 3" dir="-1 0 -3" />
+        <geom type="plane" size="10 10 0.1" material="grid" group="1"/>
+
+        <body pos="0 0 0.1">
+            <body name="object">
+                <!-- Mass and inertia after enlargement -->
+                <inertial pos="0 0 0" mass="0.004" diaginertia="0.00004 0.00004 0.00004"/>
+                
+                <!-- Radius enlarged to 0.01m -->
+                <geom type="sphere" size="0.015" material="water_drop" group="1"
+                      friction="0.001 0.0001 0.0001"/>
+            </body>
+
+            <!-- Site also enlarged synchronously -->
+            <site rgba="0 0 0 0" size="0.0025" pos="0 0 -0.01" name="bottom_site" /> 
+            <site rgba="0 0 0 0" size="0.0025" pos="0 0 0.01"  name="top_site" />
+            <site rgba="0 0 0 0" size="0.0025" pos="0.01 0 0"  name="horizontal_radius_site" />
+        </body>
+    </worldbody>
+</mujoco>
