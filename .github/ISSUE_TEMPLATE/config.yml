@@ -1,0 +1,8 @@
+blank_issues_enabled: true
+contact_links:
+  - name: Question / Discussion
+    url: https://github.com/PKU-Alignment/VLA-Arena/discussions
+    about: Ask questions or discuss ideas with the community
+  - name: Security Issue
+    url: https://github.com/PKU-Alignment/VLA-Arena/security/advisories/new
+    about: Report a security vulnerability privately

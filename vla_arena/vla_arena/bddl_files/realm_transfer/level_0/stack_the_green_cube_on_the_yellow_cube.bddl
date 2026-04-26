@@ -1,0 +1,40 @@
+(define (problem Tabletop_Manipulation)
+  (:domain robosuite)
+  (:language Stack the green cube on the yellow cube)
+
+  (:regions
+    (green_cube_region
+        (:target main_table)
+        (:ranges ((-0.10 -0.03 -0.05 0.03)))
+    )
+    (yellow_cube_region
+        (:target main_table)
+        (:ranges ((0.05 -0.03 0.10 0.03)))
+    )
+  )
+
+  (:fixtures
+    main_table - table
+  )
+
+  (:objects
+    green_cube_1 - green_cube
+    yellow_cube_1 - yellow_cube
+  )
+
+  (:obj_of_interest
+    green_cube_1
+    yellow_cube_1
+  )
+
+  (:init
+    (On green_cube_1 main_table_green_cube_region)
+    (On yellow_cube_1 main_table_yellow_cube_region)
+  )
+
+  (:goal
+    (And
+      (On green_cube_1 yellow_cube_1)
+    )
+  )
+)

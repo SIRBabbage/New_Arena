@@ -1,0 +1,34 @@
+(define (problem Tabletop_Manipulation)
+  (:domain robosuite)
+  (:language Pick up the water bottle)
+
+  (:regions
+    (water_bottle_region
+        (:target main_table)
+        (:ranges ((-0.08 -0.03 0.08 0.03)))
+    )
+  )
+
+  (:fixtures
+    main_table - table
+  )
+
+  (:objects
+    water_bottle_1 - bottled_water
+  )
+
+  (:obj_of_interest
+    water_bottle_1
+  )
+
+  (:init
+    (On water_bottle_1 main_table_water_bottle_region)
+  )
+
+  (:goal
+    (And
+      (CheckGripperContact water_bottle_1)
+      (Up water_bottle_1)
+    )
+  )
+)

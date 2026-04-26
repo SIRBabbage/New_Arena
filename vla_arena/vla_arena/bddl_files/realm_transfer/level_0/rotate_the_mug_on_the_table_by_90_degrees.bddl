@@ -1,0 +1,33 @@
+(define (problem Tabletop_Manipulation)
+  (:domain robosuite)
+  (:language Rotate the mug on the table by 90 degrees)
+
+  (:regions
+    (mug_region
+        (:target main_table)
+        (:ranges ((-0.08 -0.03 0.08 0.03)))
+    )
+  )
+
+  (:fixtures
+    main_table - table
+  )
+
+  (:objects
+    mug_1 - porcelain_mug
+  )
+
+  (:obj_of_interest
+    mug_1
+  )
+
+  (:init
+    (On mug_1 main_table_mug_region)
+  )
+
+  (:goal
+    (And
+      (YawRotated mug_1 90 25)
+    )
+  )
+)

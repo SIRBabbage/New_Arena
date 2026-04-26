@@ -1,0 +1,33 @@
+(define (problem Tabletop_Manipulation)
+  (:domain robosuite)
+  (:language Rotate the marker on the table by 90 degrees)
+
+  (:regions
+    (marker_region
+        (:target main_table)
+        (:ranges ((-0.08 -0.03 0.08 0.03)))
+    )
+  )
+
+  (:fixtures
+    main_table - table
+  )
+
+  (:objects
+    marker_1 - marker
+  )
+
+  (:obj_of_interest
+    marker_1
+  )
+
+  (:init
+    (On marker_1 main_table_marker_region)
+  )
+
+  (:goal
+    (And
+      (YawRotated marker_1 90 25)
+    )
+  )
+)

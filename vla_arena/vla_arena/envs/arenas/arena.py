@@ -1,0 +1,226 @@
+# Copyright 2025 The VLA-Arena Authors.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+import numpy as np
+from robosuite.models.base import MujocoXML
+from robosuite.utils.mjcf_utils import (
+    ENVIRONMENT_COLLISION_COLOR,
+    array_to_string,
+    find_elements,
+    new_body,
+    new_element,
+    new_geom,
+    recolor_collision_geoms,
+    string_to_array,
+)
+
+
+class Arena(MujocoXML):
+    """Base arena class."""
+
+    def __init__(self, fname):
+        super().__init__(fname)
+        # Get references to floor and bottom
+        self.bottom_pos = np.zeros(3)
+        self.floor = self.worldbody.find("./geom[@name='floor']")
+
+        # Add mocap bodies to self.root for mocap control in mjviewer UI for robot control
+        mocap_body_1 = new_body(
+            name='left_eef_target', pos='0 0 -1', mocap=True
+        )
+        mocap_body_1_geom = new_geom(
+            name='left_eef_target_box',
+            type='box',
+            size='0.05 0.05 0.05',
+            rgba='0.898 0.420 0.435 0.5',
+            conaffinity='0',
+            contype='0',
+            group='2',
+        )
+        mocap_body_1_sphere = new_geom(
+            name='left_eef_target_sphere',
+            type='sphere',
+            size='0.01',
+            pos='0 0 0',
+            rgba='0.898 0.420 0.435 0.8',
+            conaffinity='0',
+            contype='0',
+            group='2',
+        )
+        mocap_body_2 = new_body(
+            name='right_eef_target', pos='0 0 -1', mocap=True
+        )
+        mocap_body_2_geom = new_geom(
+            name='right_eef_target_box',
+            type='box',
+            size='0.05 0.05 0.05',
+            rgba='0.208 0.314 0.439 0.5',
+            conaffinity='0',
+            contype='0',
+            group='2',
+        )
+        mocap_body_2_sphere = new_geom(
+            name='right_eef_target_sphere',
+            type='sphere',
+            size='0.01',
+            pos='0 0 0',
+            rgba='0.208 0.314 0.439 0.8',
+            conaffinity='0',
+            contype='0',
+            group='2',
+        )
+        # Append the box and sphere geometries to their respective mocap bodies
+        mocap_body_1.append(mocap_body_1_geom)
+        mocap_body_1.append(mocap_body_1_sphere)
+        mocap_body_2.append(mocap_body_2_geom)
+        mocap_body_2.append(mocap_body_2_sphere)
+        # Add the mocap bodies to the world
+        self.worldbody.append(mocap_body_1)
+        self.worldbody.append(mocap_body_2)
+
+        # Run any necessary post-processing on the model
+        self._postprocess_arena()
+
+        # Recolor all geoms
+        recolor_collision_geoms(
+            root=self.worldbody,
+            rgba=ENVIRONMENT_COLLISION_COLOR,
+            exclude=lambda e: (
+                True if e.get('name', None) == 'floor' else False
+            ),
+        )
+
+    def set_origin(self, offset):
+        """
+        Applies a constant offset to all objects.
+
+        Args:
+            offset (3-tuple): (x,y,z) offset to apply to all nodes in this XML
+        """
+        offset = np.array(offset)
+        for node in self.worldbody.findall('./*[@pos]'):
+            cur_pos = string_to_array(node.get('pos'))
+            new_pos = cur_pos + offset
+            node.set('pos', array_to_string(new_pos))
+
+    def set_light_color_multipliers(self, color_multipliers):
+        """
+        Applies RGB multipliers to all scene lights.
+
+        Args:
+            color_multipliers (3-array): RGB multipliers for light color channels
+        """
+        color_multipliers = np.asarray(color_multipliers, dtype=float)
+        assert color_multipliers.shape == (3,), (
+            'Expected 3 RGB light color multipliers, got '
+            f'{color_multipliers}'
+        )
+
+        for light in self.worldbody.findall('.//light'):
+            self._apply_light_color_multipliers_to_element(
+                light, color_multipliers
+            )
+
+    @staticmethod
+    def _apply_light_color_multipliers_to_element(light, color_multipliers):
+        color_multipliers = np.asarray(color_multipliers, dtype=float)
+        for attr in ('diffuse', 'specular', 'ambient'):
+            value = light.get(attr)
+            if value is None:
+                continue
+
+            rgb = string_to_array(value)
+            if rgb.shape != (3,):
+                continue
+
+            light.set(
+                attr,
+                array_to_string(np.clip(rgb * color_multipliers, 0.0, 1.0)),
+            )
+
+    def set_light_color_tint(self, color):
+        """
+        Sets all scene lights to a saturated RGB tint.
+
+        Args:
+            color (3-array): RGB light color in [0, 1]
+        """
+        color = np.asarray(color, dtype=float)
+        assert color.shape == (3,), f'Expected 3 RGB light values, got {color}'
+
+        for light in self.worldbody.findall('.//light'):
+            self._apply_light_color_tint_to_element(light, color)
+
+    @staticmethod
+    def _apply_light_color_tint_to_element(light, color):
+        color = np.clip(np.asarray(color, dtype=float), 0.0, 1.0)
+        light.set('diffuse', array_to_string(color))
+        light.set('specular', array_to_string(np.clip(color * 0.6, 0.0, 1.0)))
+        light.set('ambient', array_to_string(np.clip(color * 0.25, 0.0, 1.0)))
+
+    def set_camera(
+        self,
+        camera_name,
+        pos=None,
+        pos_offset=[0, 0, 0],
+        quat=None,
+        camera_attribs=None,
+    ):
+        """
+        Sets a camera with @camera_name. If the camera already exists, then this overwrites its pos and quat values.
+
+        Args:
+            camera_name (str): Camera name to search for / create
+            pos (3-array): (x,y,z) coordinates of camera in world frame
+            pos_offset (3-array): (x_offset, y_offset, z_offset)
+            quat (4-array): (w,x,y,z) quaternion of camera in world frame
+            camera_attribs (dict): If specified, should be additional keyword-mapped attributes for this camera.
+                See http://www.mujoco.org/book/XMLreference.html#camera for exact attribute specifications.
+        """
+        # Determine if camera already exists
+        camera = find_elements(
+            root=self.worldbody,
+            tags='camera',
+            attribs={'name': camera_name},
+            return_first=True,
+        )
+
+        # Compose attributes
+        if camera_attribs is None:
+            camera_attribs = {}
+        if pos:
+            camera_attribs['pos'] = array_to_string(
+                np.array(pos) + np.array(pos_offset)
+            )
+        elif pos_offset != [0, 0, 0]:
+            camera_attribs['pos'] = array_to_string(
+                string_to_array(camera.get('pos')) + np.array(pos_offset),
+            )
+        if quat:
+            camera_attribs['quat'] = array_to_string(quat)
+
+        if camera is None:
+            # If camera doesn't exist, then add a new camera with the specified attributes
+            self.worldbody.append(
+                new_element(tag='camera', name=camera_name, **camera_attribs)
+            )
+        else:
+            # Otherwise, we edit all specified attributes in that camera
+            for attrib, value in camera_attribs.items():
+                camera.set(attrib, value)
+
+    def _postprocess_arena(self):
+        """
+        Runs any necessary post-processing on the imported Arena model
+        """

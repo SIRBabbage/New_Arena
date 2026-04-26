@@ -1,0 +1,20 @@
+(define (problem Tabletop_Manipulation)
+  (:domain robosuite)
+  (:language pick the kiwi and place it on the bowl)
+  (:fixtures main_table - table)
+  (:objects
+    apple_1 - kiwi
+    new_bowl_1 - new_bowl
+  )
+  (:obj_of_interest
+    apple_1
+    new_bowl_1
+  )
+  (:init
+    (On apple_1 main_table_object_region)
+    (On new_bowl_1 main_table_target_region)
+  )
+  (:goal
+    (And (On apple_1 new_bowl_1))
+  )
+)

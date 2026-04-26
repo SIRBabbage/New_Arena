@@ -1,0 +1,33 @@
+# OpenPI Training Configuration
+# `name` selects the base OpenPI config in `src/openpi/training/config.py`.
+# `exp_name` identifies this run; checkpoints are stored under
+# `<checkpoint_base_dir>/<name>/<exp_name>/`.
+
+name: "pi05_vla_arena_low_mem_finetune"
+exp_name: "openpi_training"
+
+# Core training parameters
+batch_size: 32
+num_train_steps: 30000
+log_interval: 100
+save_interval: 1000
+
+# Dataset (HF repo id or local LeRobot dataset path)
+data:
+  repo_id: "VLA-Arena/VLA_Arena_L0_L_lerobot_openpi"
+
+# Checkpoint/output paths
+checkpoint_base_dir: "./checkpoints"
+assets_base_dir: "./assets"
+overwrite: true
+resume: false
+
+# Logging
+wandb_enabled: true
+project_name: "openpi"
+
+# Runtime
+seed: 42
+num_workers: 2
+keep_period: 5000
+fsdp_devices: 1

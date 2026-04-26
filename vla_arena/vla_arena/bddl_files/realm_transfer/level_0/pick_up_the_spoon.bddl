@@ -1,0 +1,34 @@
+(define (problem Tabletop_Manipulation)
+  (:domain robosuite)
+  (:language Pick up the spoon)
+
+  (:regions
+    (spoon_region
+        (:target main_table)
+        (:ranges ((-0.08 -0.03 0.08 0.03)))
+    )
+  )
+
+  (:fixtures
+    main_table - table
+  )
+
+  (:objects
+    spoon_1 - spoon
+  )
+
+  (:obj_of_interest
+    spoon_1
+  )
+
+  (:init
+    (On spoon_1 main_table_spoon_region)
+  )
+
+  (:goal
+    (And
+      (CheckGripperContact spoon_1)
+      (Up spoon_1)
+    )
+  )
+)

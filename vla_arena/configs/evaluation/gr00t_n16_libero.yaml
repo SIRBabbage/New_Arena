@@ -1,0 +1,79 @@
+# GR00T N1.6 evaluation configuration for VLA-Arena.
+# This variant auto-starts the GR00T server from /home/wangshuo/Libero_GR00T
+# and loads the LIBERO Spatial checkpoint from that repo.
+
+#################################################################################################################
+# GR00T policy parameters
+#################################################################################################################
+policy_mode: "server"
+model_path: "/home/wangshuo/Libero_GR00T/examples/LIBERO/checkpoint/libero_spatial"
+embodiment_tag: "LIBERO_PANDA"
+use_sim_policy_wrapper: true
+strict: true
+device: "cuda"
+
+# Server mode options
+host: "127.0.0.1"
+port: 5555
+api_token: null
+auto_start_policy_server: true
+policy_server_start_timeout_sec: 180
+policy_server_poll_interval_sec: 1.0
+gr00t_root: "/home/wangshuo/Libero_GR00T"
+gr00t_python: null
+
+# Inference behavior
+open_loop_horizon: 8
+image_resize_height: null
+image_resize_width: null
+controller_mode: "osc_pose"
+joint_delta_clip: 0.05
+gripper_threshold: 0.5
+normalize_gripper_to_env: true
+invert_gripper_for_env: true
+binarize_gripper: true
+
+#################################################################################################################
+# VLA-Arena environment-specific parameters
+#################################################################################################################
+task_suite_name: "safety_static_obstacles+blur"
+task_level: 1
+task_name: "pick_the_apple_and_place_it_on_the_bowl_1"
+task_names: null
+num_steps_wait: 10
+num_trials_per_task: 10
+add_noise: false
+adjust_light: false
+randomize_color: false
+camera_offset: false
+blur: false
+safety: false
+layout_perturbation: false
+layout_random: false
+unseen_object_perturbation: false
+unseen_object_category: null
+init_state_selection_mode: "first"
+init_state_offset: 0
+init_state_offset_random: false
+
+#################################################################################################################
+# Utils
+#################################################################################################################
+save_video_mode: "first_success_failure"
+save_video_every_n_episodes: 2
+use_local_log: true
+local_log_dir: "./experiments/logs"
+run_id_note: null
+use_wandb: false
+wandb_entity: "your-wandb-entity"
+wandb_project: "your-wandb-project"
+seed: 7
+result_json_path: default
+
+#################################################################################################################
+# Language perturbation parameters
+#################################################################################################################
+replacements_file: "./language_replacements"
+use_replacements: false
+replacement_probability: 1.0
+replacement_level: 1

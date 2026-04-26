@@ -1,0 +1,170 @@
+# VLA-Arena 文档目录（中文版）
+
+本文档提供了 VLA-Arena 所有文档文件的完整目录。
+
+## 📚 完整文档概览
+
+### 1. 数据收集指南
+**文件：** `data_collection_zh.md`
+
+在自定义场景中收集演示数据并转换数据格式的综合指南。
+
+#### 目录结构：
+1. [收集演示数据](#1-收集演示数据)
+   - 交互式仿真环境设置
+   - 机械臂操控的键盘控制
+   - 数据收集过程和最佳实践
+2. [转换数据格式](#2-转换数据格式)
+   - 将演示数据转换为训练格式
+   - 通过轨迹回放生成图像
+   - 数据集创建过程
+3. [重构数据集](#3-重构数据集)
+   - 过滤空动作以确保轨迹连续性
+   - 数据集优化和验证
+   - 质量保证程序
+4. [将数据集转换为rlds格式](#4-将数据集转换为rlds格式)
+   - RLDS 格式转换
+   - 数据集标准化
+5. [将rlds数据集转换为lerobot格式](#5-将rlds数据集转换为lerobot格式)
+   - LeRobot 格式转换
+   - 兼容性处理
+
+---
+
+### 2. 场景构建指南
+**文件：** `scene_construction_zh.md`
+
+使用 BDDL（行为域定义语言）构建自定义任务场景的详细指南。
+
+#### 目录结构：
+1. [BDDL 文件结构](#1-bddl-文件结构)
+   - 基本结构定义
+   - 领域和问题定义
+   - 语言指令规范
+2. [区域定义](#区域定义)
+   - 空间范围定义
+   - 区域参数和配置
+3. [对象定义](#对象定义)
+   - 固定对象（静态对象）
+   - 可操作对象
+   - 关注对象
+   - 具有运动类型的移动对象
+4. [状态定义](#状态定义)
+   - 初始状态配置
+   - 目标状态定义
+   - 支持的状态谓词
+5. [图像效果设置](#图像效果设置)
+   - 渲染效果配置
+   - 视觉增强选项
+6. [成本约束](#成本约束)
+   - 惩罚条件定义
+   - 支持的成本谓词
+7. [可视化 BDDL 文件](#2-可视化-bddl-文件)
+   - 场景可视化过程
+   - 视频生成工作流
+8. [资产](#3-资产)
+   - 现成资产
+   - 自定义资产准备
+   - 资产注册过程
+
+---
+
+### 3. 模型微调与评估指南
+**文件：** `finetuning_and_evaluation_zh.md`
+
+使用 VLA-Arena 生成的数据集微调和评估 VLA 模型的综合指南。支持 OpenVLA、OpenVLA-OFT、Openpi、UniVLA、SmolVLA 等模型。
+
+#### 目录结构：
+1. [通用模型](#通用模型)
+   - 依赖安装
+   - 模型微调
+   - 模型评估
+2. [配置文件说明](#配置文件说明)
+   - 数据集路径配置
+   - 模型参数设置
+   - 训练超参数配置
+
+---
+
+### 4. OpenPI 单扰动评测说明
+**文件：** `openpi_single_perturbation_eval_zh.md`
+
+面向 OpenPI / pi0 的专项说明，介绍如何仅通过修改 `task_suite_name` 来逐个测试：
+
+- 光照变化
+- 模糊
+- 噪声
+- 颜色随机化
+- 相机偏移
+- 语言替换
+
+---
+
+### 5. GR00T 单扰动评测说明
+**文件：** `gr00t_single_perturbation_eval_zh.md`
+
+面向 GR00T 的专项说明，介绍如何在 `VLA-Arena` 内：
+
+- 用 `GR00T.yaml` 指定 checkpoint
+- 自动拉起 `Isaac-GR00T` policy server
+- 指定 task / suite / perturbation 做评测
+
+---
+
+### 6. VLA-Arena 任务总表
+**文件：** `vla_arena_task_catalog_zh.md`
+
+按 suite 和难度等级列出 VLA-Arena 核心 benchmark 的全部 170 个自然语言任务，适合：
+
+- 直接查 primitive task 文本
+- 对照 benchmark 覆盖范围
+- 选定你想测的 task family
+
+---
+
+## 📁 目录结构
+
+```
+docs/
+├── finetuning_and_evaluation.md         # 模型微调与评估指南（英文）
+├── finetuning_and_evaluation_zh.md      # 模型微调与评估指南（中文）
+├── openpi_single_perturbation_eval_zh.md # OpenPI 单扰动评测说明（中文）
+├── gr00t_single_perturbation_eval_zh.md  # GR00T 单扰动评测说明（中文）
+├── vla_arena_task_catalog_zh.md          # VLA-Arena 任务总表（中文）
+├── data_collection.md          # 数据收集指南（英文）
+├── data_collection_zh.md       # 数据收集指南（中文）
+├── scene_construction.md       # 场景构建指南（英文）
+├── scene_construction_zh.md    # 场景构建指南（中文）
+├── asset_management.md         # 任务资产管理指南（英文）
+├── asset_management_zh.md      # 任务资产管理指南（中文）
+└── image/                      # 文档图片和 GIF
+```
+
+---
+
+## 🚀 快速开始工作流
+
+### 1. 场景构建
+1. 阅读 `scene_construction_zh.md` 了解 BDDL 文件结构
+2. 使用 BDDL 语法定义你的任务场景
+3. 使用 `scripts/visualize_bddl.py` 预览场景
+
+### 2. 数据收集
+1. 按照 `data_collection_zh.md` 进行演示收集
+2. 使用 `scripts/collect_demonstration.py` 进行交互式数据收集
+3. 使用 `scripts/group_create_dataset.py` 转换数据格式
+
+### 3. 模型训练与评估
+1. 按照 `finetuning_and_evaluation_zh.md` 安装模型依赖
+2. 使用 `uv run --project envs/<model_name> vla-arena train` 命令进行模型微调
+3. 根据你的需求配置训练参数
+4. 使用 `uv run --project envs/<model_name> vla-arena eval` 命令评估模型性能
+5. 通过 WandB 监控训练进度
+6. 分析结果并迭代改进模型
+
+> 说明：首次 `uv run` 会自动创建环境并安装依赖，可能需要一些时间。
+
+### 4. 任务分享（可选）
+1. 按照 `asset_management_zh.md` 打包你的自定义任务
+2. 使用 `vla-arena.manage-tasks` 上传/下载/安装任务包
+3. 与社区分享你的任务套件
