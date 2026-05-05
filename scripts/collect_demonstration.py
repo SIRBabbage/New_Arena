@@ -32,13 +32,35 @@ import vla_arena.vla_arena.envs.bddl_utils as BDDLUtils
 from vla_arena.vla_arena.envs import *
 
 
+INVALID_DIRECTORY_CHARS = '<>:"/\\|?*'
+
+
+def sanitize_directory_name(name):
+    sanitized = ''.join(
+        '_' if char in INVALID_DIRECTORY_CHARS else char
+        for char in (name or 'default').strip()
+    )
+    sanitized = sanitized.rstrip(' .')
+    return sanitized or 'default'
+
+
+def get_episode_directory_name(ep_directory):
+    if not ep_directory:
+        return None
+    return os.path.basename(os.path.normpath(ep_directory))
+
+
+def get_demo_output_dir(run_directory, demo_index):
+    return os.path.join(run_directory, f'{demo_index:02d}')
+
+
 def collect_human_trajectory(
     env,
     device,
     arm,
     env_configuration,
     problem_info,
-    remove_directory=[],
+    remove_directory=None,
     new_dir=None,
     use_synchronous_cost_curve=False,
     max_fr=20,
@@ -58,6 +80,9 @@ def collect_human_trajectory(
         use_synchronous_cost_curve: whether to show real-time cost curve
         max_fr (int): if specified, pause the simulation whenever simulation runs faster than max_fr
     """
+    if remove_directory is None:
+        remove_directory = []
+
     reset_success = False
     # replay_images=[]
     while not reset_success:
@@ -78,7 +103,8 @@ def collect_human_trajectory(
     for robot in env.robots:
         robot.print_action_info_dict()
 
-    saving = True
+    outcome = 'reset'
+    successful = False
     count = 0
 
     # ====== Plotting variables ======
@@ -123,10 +149,16 @@ def collect_human_trajectory(
         # Get the newest action
         input_ac_dict = device.input2action()
 
-        # If action is none, then this a reset so we should break
+        # Device reset / exit is signaled by returning None.
         if input_ac_dict is None:
-            print('Break')
-            saving = False
+            if hasattr(device, 'consume_control_event'):
+                outcome = device.consume_control_event() or 'reset'
+            else:
+                outcome = 'reset'
+            if outcome == 'exit':
+                print('Exit requested, stopping data collection.')
+            else:
+                print('Reset requested, discarding current trajectory.')
             break
 
         action_dict = deepcopy(input_ac_dict)
@@ -184,8 +216,11 @@ def collect_human_trajectory(
                 except:
                     pass  # Ignore GUI update errors
 
-        # Also break if we complete the task
+        # Only treat the trajectory as successful after the goal condition
+        # has held for the required post-success timesteps.
         if task_completion_hold_count == 0:
+            successful = True
+            outcome = 'saved'
             break
 
         # state machine to check for having a success for 10 consecutive timesteps
@@ -212,14 +247,20 @@ def collect_human_trajectory(
 
     print(f'Total steps: {count}')
 
-    if not saving:
-        remove_directory.append(env.ep_directory.split('/')[-1])
+    if successful:
+        outcome = 'saved'
+
+    episode_directory = get_episode_directory_name(
+        getattr(env, 'ep_directory', None)
+    )
+    if outcome != 'saved' and episode_directory is not None:
+        remove_directory.append(episode_directory)
 
     # cleanup for end of data collection episodes
     env.close()
 
     # ====== Save plot (whether or not real-time display was used) ======
-    if len(cost_list) > 0:
+    if outcome == 'saved' and len(cost_list) > 0:
         # If real-time display was used before, turn off interactive mode
         if use_synchronous_cost_curve and fig is not None:
             plt.ioff()
@@ -243,7 +284,8 @@ def collect_human_trajectory(
 
         plt.close(fig)
     else:
-        print('Warning: No cost data collected, skipping plot save')
+        if outcome == 'saved':
+            print('Warning: No cost data collected, skipping plot save')
         if fig is not None:
             plt.close(fig)
     # save_rollout_video(
@@ -253,11 +295,16 @@ def collect_human_trajectory(
     #     task_description="1",
     #     log_file=None
     # )
-    return saving
+    return outcome, episode_directory
 
 
 def gather_demonstrations_as_hdf5(
-    directory, out_dir, env_info, args, remove_directory=[]
+    directory,
+    out_dir,
+    env_info,
+    args,
+    remove_directory=None,
+    episode_directories=None,
 ):
     """
     Gathers the demonstrations saved in @directory into a
@@ -286,7 +333,29 @@ def gather_demonstrations_as_hdf5(
             including controller and robot info
         args: Arguments from command line
         remove_directory: List of directories to skip
+        episode_directories: Optional list of episode directory names to export.
     """
+
+    remove_directory = set(remove_directory or [])
+    if episode_directories is None:
+        episode_directories = sorted(os.listdir(directory))
+    else:
+        episode_directories = sorted(episode_directories)
+
+    export_directories = []
+    for ep_directory in episode_directories:
+        if ep_directory in remove_directory:
+            print(f'Skipping {ep_directory}')
+            continue
+        if not os.path.isdir(os.path.join(directory, ep_directory)):
+            continue
+        export_directories.append(ep_directory)
+
+    if not export_directories:
+        print('No demonstrations to save.')
+        return None
+
+    os.makedirs(out_dir, exist_ok=True)
 
     timestamp = datetime.datetime.now().strftime('%Y%m%d_%H%M%S')
     hdf5_path = os.path.join(out_dir, f'demo_{timestamp}.hdf5')
@@ -303,11 +372,7 @@ def gather_demonstrations_as_hdf5(
         else {}
     )
 
-    for ep_directory in os.listdir(directory):
-        # Skip directories marked for removal
-        if ep_directory in remove_directory:
-            print(f'Skipping {ep_directory}')
-            continue
+    for ep_directory in export_directories:
 
         state_paths = os.path.join(directory, ep_directory, 'state_*.npz')
         states = []
@@ -430,6 +495,12 @@ if __name__ == '__main__':
         default=10,
         help='How many demonstrations to collect',
     )
+    parser.add_argument(
+        '--name',
+        type=str,
+        default='default',
+        help='Name for this collection run; results are saved under .../<name>/<index>/',
+    )
     parser.add_argument('--bddl-file', type=str)
     parser.add_argument('--vendor-id', type=int, default=9583)
     parser.add_argument('--product-id', type=int, default=50734)
@@ -495,23 +566,70 @@ if __name__ == '__main__':
     # Wrap this with visualization wrapper
     env = VisualizationWrapper(env)
 
+    # make a new timestamped directory
+    t1, t2 = datetime.datetime.now().strftime(
+        '%Y%m%d_%H%M%S'
+    ), datetime.datetime.now().strftime(
+        '%f',
+    )
+    DATE = time.strftime('%Y_%m_%d')
+    run_root_dir = os.path.join(
+        args.directory,
+        f'{DATE}',
+        f'{t1}_{t2}_{domain_name}_' + language_instruction.replace(' ', '_'),
+    )
+    run_name = sanitize_directory_name(args.name)
+    new_dir = os.path.join(run_root_dir, run_name)
+
+    os.makedirs(new_dir, exist_ok=True)
+
     # Grab reference to controller config and convert it to json-encoded string
     env_info = json.dumps(config)
 
     # wrap the environment with data collection wrapper
-    tmp_directory = 'demonstration_data/tmp/{}_ln_{}/{}'.format(
-        problem_name,
-        language_instruction.replace(' ', '_'),
-        str(time.time()).replace('.', '_'),
-    )
+    tmp_directory = os.path.join(new_dir, 'tmp')
 
     env = DataCollectionWrapper(env, tmp_directory)
 
     # initialize device using new interface
     if args.device == 'keyboard':
+        from pynput.keyboard import Key
         from robosuite.devices import Keyboard
 
-        device = Keyboard(
+        class CollectionKeyboard(Keyboard):
+            @staticmethod
+            def _display_controls():
+                Keyboard._display_controls()
+                print('esc'.ljust(30) + '\tstop data collection')
+
+            def __init__(self, *keyboard_args, **keyboard_kwargs):
+                self._exit_state = 0
+                super().__init__(*keyboard_args, **keyboard_kwargs)
+
+            def start_control(self):
+                super().start_control()
+                self._exit_state = 0
+
+            def on_release(self, key):
+                if key == Key.esc:
+                    self._exit_state = 1
+                    self._reset_state = 1
+                    self._enabled = False
+                    self._reset_internal_state()
+                    return
+                super().on_release(key)
+
+            def consume_control_event(self):
+                if self._exit_state:
+                    self._exit_state = 0
+                    self._reset_state = 0
+                    return 'exit'
+                if self._reset_state:
+                    self._reset_state = 0
+                    return 'reset'
+                return None
+
+        device = CollectionKeyboard(
             env=env,
             pos_sensitivity=args.pos_sensitivity,
             rot_sensitivity=args.rot_sensitivity,
@@ -549,40 +667,33 @@ if __name__ == '__main__':
             "Invalid device choice: choose 'keyboard', 'spacemouse', 'dualsense', or 'mjgui'.",
         )
 
-    # make a new timestamped directory
-    t1, t2 = datetime.datetime.now().strftime(
-        '%Y%m%d_%H%M%S'
-    ), datetime.datetime.now().strftime(
-        '%f',
-    )
-    DATE = time.strftime('%Y_%m_%d')
-    new_dir = os.path.join(
-        args.directory,
-        f'{DATE}',
-        f'{t1}_{t2}_{domain_name}_' + language_instruction.replace(' ', '_'),
-    )
-
-    os.makedirs(new_dir, exist_ok=True)
-
     # collect demonstrations
     remove_directory = []
     i = 0
     while i < args.num_demonstration:
         print(f'Collecting demonstration {i + 1}/{args.num_demonstration}')
-        saving = collect_human_trajectory(
+        demo_dir = get_demo_output_dir(new_dir, i)
+        outcome, episode_directory = collect_human_trajectory(
             env,
             device,
             args.arm,
             args.config,
             problem_info,
             remove_directory,
-            new_dir,
+            demo_dir,
             args.use_synchronous_cost_curve,
             args.max_fr,
         )
-        if saving:
+        if outcome == 'saved':
             print(f'Remove directory list: {remove_directory}')
             gather_demonstrations_as_hdf5(
-                tmp_directory, new_dir, env_info, args, remove_directory
+                tmp_directory,
+                demo_dir,
+                env_info,
+                args,
+                remove_directory,
+                [episode_directory] if episode_directory is not None else None,
             )
             i += 1
+        elif outcome == 'exit':
+            break

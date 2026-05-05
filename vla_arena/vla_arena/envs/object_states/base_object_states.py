@@ -75,6 +75,12 @@ class ObjectState(BaseObjectState):
 
     @staticmethod
     def get_relative_yaw_from_quats(original_quat, current_quat):
+        original_quat = transform_utils.convert_quat(
+            np.asarray(original_quat), to='xyzw'
+        )
+        current_quat = transform_utils.convert_quat(  
+            np.asarray(current_quat), to='xyzw'
+        )
         quat_diff = transform_utils.quat_multiply(
             current_quat,
             transform_utils.quat_inverse(original_quat),

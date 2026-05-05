@@ -12,7 +12,7 @@ VLA-Arena provides a complete framework for collecting data in custom scenes and
 ## 1. Collect Demonstration Data
 You can use `scripts/collect_demonstration.py` to collect demonstration data in simulation environment:
 ```bash
-uv run --project envs/base python scripts/collect_demonstration.py --bddl-file <your_bddl_file_path>
+uv run --project envs/base python scripts/collect_demonstration.py --bddl-file <your_bddl_file_path> --name <collection_name>
 ```
 This script will display an interactive simulation environment window, where you can use the keyboard to control the robotic arm:
 
@@ -25,6 +25,10 @@ This script will display an interactive simulation environment window, where you
   <tr>
     <td><code>Q</code></td>
     <td colspan='2'>Reset environment</td>
+  </tr>
+  <tr>
+    <td><code>Esc</code></td>
+    <td colspan='2'>Stop data collection and exit the program</td>
   </tr>
   <tr>
     <td><code>Spacebar</code></td>
@@ -82,11 +86,12 @@ This script will display an interactive simulation environment window, where you
 You need to manipulate the robotic arm to complete the task specified in the `language instruction` of the BDDL file, while avoiding any `cost` defined in the BDDL file.
 <p align="center"><img src="image/data_collection_1.gif" width="300" height="300"/></p>
 
-The collected demonstration data will be saved in `demonstration_data/` .
+The collected demonstration data will be saved in `demonstration_data/<date>/<task>/<collection_name>/`.
+Each successful trajectory is stored in its own zero-padded subdirectory such as `00/`, `01/`, ...
 
 ### Notes
 - The collected data must form a continuous trajectory. Please minimize pauses during the collection process.
-- If a mistake occurs during the process of operation, causing the trajectory to be interrupted (e.g., the object drops), please reset the environment and collect again.
+- If a mistake occurs during the process of operation, causing the trajectory to be interrupted (e.g., the object drops), press `Q` to reset the environment and recollect the current trajectory.
 
 ## 2. Convert Data Format
 

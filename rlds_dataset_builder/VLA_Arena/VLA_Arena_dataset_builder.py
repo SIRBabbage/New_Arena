@@ -219,6 +219,8 @@ class VLAArena(MultiThreadedDatasetBuilder):
 
     def _split_paths(self):
         """Define filepaths for data splits."""
+        _here = os.path.dirname(os.path.abspath(__file__))
+        dataset_dir = os.path.join(_here, '..', '..', 'newDataset')
         return {
-            'train': glob.glob('your/path/to/hdf5/file'),
+            'train': glob.glob(os.path.join(dataset_dir, '*.hdf5')),
         }
